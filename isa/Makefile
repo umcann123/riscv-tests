@@ -17,6 +17,7 @@ include $(src_dir)/rv64uzfh/Makefrag
 include $(src_dir)/rv64si/Makefrag
 include $(src_dir)/rv64ssvnapot/Makefrag
 include $(src_dir)/rv64mi/Makefrag
+include $(src_dir)/rv64p_ext/Makefrag
 endif
 include $(src_dir)/rv32ui/Makefrag
 include $(src_dir)/rv32uc/Makefrag
@@ -27,6 +28,8 @@ include $(src_dir)/rv32ud/Makefrag
 include $(src_dir)/rv32uzfh/Makefrag
 include $(src_dir)/rv32si/Makefrag
 include $(src_dir)/rv32mi/Makefrag
+include $(src_dir)/rv32p_ext/Makefrag
+
 
 default: all
 
@@ -78,7 +81,7 @@ endif
 
 endef
 
-$(eval $(call compile_template,rv32ui,-march=rv32g -mabi=ilp32))
+$(eval $(call compile_template,rv32ui,-march=rv32imafdcp -mabi=ilp32))
 $(eval $(call compile_template,rv32uc,-march=rv32g -mabi=ilp32))
 $(eval $(call compile_template,rv32um,-march=rv32g -mabi=ilp32))
 $(eval $(call compile_template,rv32ua,-march=rv32g -mabi=ilp32))
@@ -87,8 +90,8 @@ $(eval $(call compile_template,rv32ud,-march=rv32g -mabi=ilp32))
 $(eval $(call compile_template,rv32uzfh,-march=rv32g_zfh -mabi=ilp32))
 $(eval $(call compile_template,rv32si,-march=rv32g -mabi=ilp32))
 $(eval $(call compile_template,rv32mi,-march=rv32g -mabi=ilp32))
+$(eval $(call compile_template,rv32p_ext,-march=rv32imafdcp_zpsf -mabi=ilp32)) ###HHHHHHERERER
 ifeq ($(XLEN),64)
-$(eval $(call compile_template,rv64ui,-march=rv64imafdcp_zprv -mabi=lp64)) ###HHHHHHERERER
 $(eval $(call compile_template,rv64uc,-march=rv64g -mabi=lp64))
 $(eval $(call compile_template,rv64um,-march=rv64g -mabi=lp64))
 $(eval $(call compile_template,rv64ua,-march=rv64g -mabi=lp64))
@@ -98,6 +101,10 @@ $(eval $(call compile_template,rv64uzfh,-march=rv64g_zfh -mabi=lp64))
 $(eval $(call compile_template,rv64si,-march=rv64g -mabi=lp64)) 
 $(eval $(call compile_template,rv64ssvnapot,-march=rv64g -mabi=lp64))
 $(eval $(call compile_template,rv64mi,-march=rv64g -mabi=lp64))
+$(eval $(call compile_template,rv64ui,-march=rv64imafdcp_zprv -mabi=lp64)) ###HHHHHHERERER
+
+$(eval $(call compile_template,rv64p_ext,-march=rv64imafdcp_zprv -mabi=lp64)) ###HHHHHHERERER
+
 endif
 
 tests_dump = $(addsuffix .dump, $(tests))

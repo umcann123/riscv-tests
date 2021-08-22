@@ -41,7 +41,21 @@ test_ ## testnum: \
 # Tests for instructions with immediate operand
 #-----------------------------------------------------------------------
 
+#define TEST_MYTEST( testnum,  result ) \
+    TEST_CASE( testnum, x14, result, \
+      li  x1, MASK_XLEN(0x10000000); \
+      li  x2, MASK_XLEN(0x7FFF0001); \
+      stsa16 x1, x1, x2; \
+      li  x3, MASK_XLEN(0x10000000); \
+      li  x4, MASK_XLEN(0x7FFF0001); \
+      urstas16 x3, x3, x4; \
+      cras16 x14, x1, x3; \
+    )
+
+
 #define SEXT_IMM(x) ((x) | (-(((x) >> 11) & 1) << 11))
+
+
 
 #define TEST_IMM_OP( testnum, inst, result, val1, imm ) \
     TEST_CASE( testnum, x14, result, \
@@ -126,6 +140,21 @@ test_ ## testnum: \
       li  x1, MASK_XLEN(val1); \
       li  x2, MASK_XLEN(val2); \
       inst x14, x1, x2; \
+    )
+
+#define TEST_CASE_PAIR( testnum, testreg1,testreg2, correctval1,correctval2, code... ) \
+test_ ## testnum: \
+    code; \
+    li  x7, MASK_XLEN(correctval1); \
+    li  x8, MASK_XLEN(correctval2); \
+    li  TESTNUM, testnum; \
+    bne testreg1, x7, fail; \
+    bne testreg2, x8, fail;
+#define TEST_RR_OP_PAIR( testnum, inst, result1,result2, val1, val2 ) \
+    TEST_CASE_PAIR( testnum, x15, x14, result1, result2, \
+      li  x1, MASK_XLEN(val1); \
+      li  x2, MASK_XLEN(val2); \
+      inst x3, x1, x2; \
     )
 
 #define TEST_RR_SRC1_EQ_DEST( testnum, inst, result, val1, val2 ) \
