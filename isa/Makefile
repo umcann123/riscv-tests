@@ -28,8 +28,9 @@ include $(src_dir)/rv32ud/Makefrag
 include $(src_dir)/rv32uzfh/Makefrag
 include $(src_dir)/rv32si/Makefrag
 include $(src_dir)/rv32mi/Makefrag
+ifeq ($(XLEN),32)
 include $(src_dir)/rv32p_ext/Makefrag
-
+endif
 
 default: all
 
@@ -101,8 +102,6 @@ $(eval $(call compile_template,rv64uzfh,-march=rv64g_zfh -mabi=lp64))
 $(eval $(call compile_template,rv64si,-march=rv64g -mabi=lp64)) 
 $(eval $(call compile_template,rv64ssvnapot,-march=rv64g -mabi=lp64))
 $(eval $(call compile_template,rv64mi,-march=rv64g -mabi=lp64))
-$(eval $(call compile_template,rv64ui,-march=rv64imafdcp_zprv -mabi=lp64)) ###HHHHHHERERER
-
 $(eval $(call compile_template,rv64p_ext,-march=rv64imafdcp_zprv -mabi=lp64)) ###HHHHHHERERER
 
 endif

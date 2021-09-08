@@ -134,6 +134,20 @@ test_ ## testnum: \
 #-----------------------------------------------------------------------
 # Tests for an instruction with register-register operands
 #-----------------------------------------------------------------------
+#define TEST_CASE( testnum, testreg, correctval, code... ) \
+test_ ## testnum: \
+    code; \
+    li  x7, MASK_XLEN(correctval); \
+    li  TESTNUM, testnum; \
+    bne testreg, x7, fail;
+
+#define TEST_RRR_OP( testnum, inst, result, val3, val1, val2 ) \
+    TEST_CASE( testnum, x14, result, \
+      li  x1, MASK_XLEN(val1); \
+      li  x2, MASK_XLEN(val2); \
+      li  x14, MASK_XLEN(val3); \
+      inst x14, x1, x2; \
+    )
 
 #define TEST_RR_OP( testnum, inst, result, val1, val2 ) \
     TEST_CASE( testnum, x14, result, \

@@ -3,6 +3,6 @@
 #-----------------------------------------------------------------------
 
 rv64p_ext_sc_tests = \
-	all \
+	all experiment \ 
 
 rv64p_ext_p_tests = $(addprefix rv64p_ext-p-, $(rv64p_ext_sc_tests))
