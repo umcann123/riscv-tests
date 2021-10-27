@@ -38,9 +38,8 @@ test_ ## testnum: \
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
-# Tests for instructions with immediate operand
+# My Tests for conv kernel
 #-----------------------------------------------------------------------
-
 #define TEST_MYTEST( testnum,  result ) \
     TEST_CASE( testnum, x14, result, \
       li  x1, MASK_XLEN(0x10000000); \
@@ -53,6 +52,11 @@ test_ ## testnum: \
     )
 
 
+#-----------------------------------------------------------------------
+# Tests for instructions with immediate operand
+#-----------------------------------------------------------------------
+
+
 #define SEXT_IMM(x) ((x) | (-(((x) >> 11) & 1) << 11))
 
 
@@ -60,6 +64,12 @@ test_ ## testnum: \
 #define TEST_IMM_OP( testnum, inst, result, val1, imm ) \
     TEST_CASE( testnum, x14, result, \
       li  x1, MASK_XLEN(val1); \
+      inst x14, x1, SEXT_IMM(imm); \
+    )
+#define TEST_RD_IMM_OP( testnum, inst, result, rd, val, imm ) \
+    TEST_CASE( testnum, x14, result, \
+      li  x1, MASK_XLEN(val); \
+      li  x14, MASK_XLEN(rd); \
       inst x14, x1, SEXT_IMM(imm); \
     )
 
@@ -141,14 +151,6 @@ test_ ## testnum: \
     li  TESTNUM, testnum; \
     bne testreg, x7, fail;
 
-#define TEST_RRR_OP( testnum, inst, result, val3, val1, val2 ) \
-    TEST_CASE( testnum, x14, result, \
-      li  x1, MASK_XLEN(val1); \
-      li  x2, MASK_XLEN(val2); \
-      li  x14, MASK_XLEN(val3); \
-      inst x14, x1, x2; \
-    )
-
 #define TEST_RR_OP( testnum, inst, result, val1, val2 ) \
     TEST_CASE( testnum, x14, result, \
       li  x1, MASK_XLEN(val1); \
@@ -156,20 +158,6 @@ test_ ## testnum: \
       inst x14, x1, x2; \
     )
 
-#define TEST_CASE_PAIR( testnum, testreg1,testreg2, correctval1,correctval2, code... ) \
-test_ ## testnum: \
-    code; \
-    li  x7, MASK_XLEN(correctval1); \
-    li  x8, MASK_XLEN(correctval2); \
-    li  TESTNUM, testnum; \
-    bne testreg1, x7, fail; \
-    bne testreg2, x8, fail;
-#define TEST_RR_OP_PAIR( testnum, inst, result1,result2, val1, val2 ) \
-    TEST_CASE_PAIR( testnum, x15, x14, result1, result2, \
-      li  x1, MASK_XLEN(val1); \
-      li  x2, MASK_XLEN(val2); \
-      inst x3, x1, x2; \
-    )
 
 #define TEST_RR_SRC1_EQ_DEST( testnum, inst, result, val1, val2 ) \
     TEST_CASE( testnum, x1, result, \
@@ -252,6 +240,82 @@ test_ ## testnum: \
       li x1, MASK_XLEN(val1); \
       li x2, MASK_XLEN(val2); \
       inst x0, x1, x2; \
+    )
+
+#-----------------------------------------------------------------------
+# Tests for an instruction with Register pair
+#-----------------------------------------------------------------------
+
+#define TEST_CASE_PAIR( testnum, testreg1, testreg2, correctval1, correctval2, code... ) \
+test_ ## testnum: \
+    code; \
+    li  x6, MASK_XLEN(correctval1); \
+    li  x7, MASK_XLEN(correctval2); \
+    li  TESTNUM, testnum; \
+    bne testreg1, x6, fail; \
+    bne testreg2, x7, fail;
+#define TEST_RR_OP_PAIR( testnum, inst, result1, result2, val1, val2 ) \
+    TEST_CASE_PAIR( testnum, x15, x14, result1, result2, \
+      li  x1, MASK_XLEN(val1); \
+      li  x2, MASK_XLEN(val2); \
+      inst x14, x1, x2; \
+    )
+
+#define TEST_RR_OP_RD_PAIR( testnum, inst, result1, result2, rd1, rd2, val1, val2 ) \
+    TEST_CASE_PAIR( testnum, x15, x14, result1, result2, \
+      li  x1, MASK_XLEN(val1); \
+      li  x2, MASK_XLEN(val2); \
+      li  x14, MASK_XLEN(rd2); \
+      li  x15, MASK_XLEN(rd1); \
+      inst x14, x1, x2; \
+    )
+
+#define TEST_RR_D_OP_PAIR( testnum, inst, result1, result2, val11, val12, val2 ) \
+    TEST_CASE_PAIR( testnum, x15, x14, result1, result2, \
+      li  x2, MASK_XLEN(val12); \
+      li  x3, MASK_XLEN(val11); \
+      li  x4, MASK_XLEN(val2); \
+      inst x14, x2, x4; \
+    )
+
+#define TEST_R1_PAIR_OP( testnum, inst, result, val11, val12, val2 ) \
+    TEST_CASE( testnum, x14, result, \
+      li  x2, MASK_XLEN(val11); \
+      li  x3, MASK_XLEN(val12); \
+      li  x4, MASK_XLEN(val2); \
+      inst x14, x2, x4; \
+    )
+
+#define TEST_PAIR_IMM_OP( testnum, inst, result, val11, val12, imm ) \
+    TEST_CASE( testnum, x14, result, \
+      li  x2, MASK_XLEN(val11); \
+      li  x3, MASK_XLEN(val12); \
+      inst x14, x2, SEXT_IMM(imm); \
+    )
+#-----------------------------------------------------------------------
+# Tests for instructions with register-register-register operand
+#-----------------------------------------------------------------------
+
+#define TEST_RR_RC_OP( testnum, inst, result, val1, val2, val3 ) \
+    TEST_CASE( testnum, x14, result, \
+      li  x1, MASK_XLEN(val1); \
+      li  x2, MASK_XLEN(val2); \
+      li  x3, MASK_XLEN(val3); \
+      inst x14, x1, x2, x3; \
+    )
+#define TEST_RRR_OP( testnum, inst, result, val3, val1, val2 ) \
+    TEST_CASE( testnum, x14, result, \
+      li  x1, MASK_XLEN(val1); \
+      li  x2, MASK_XLEN(val2); \
+      li  x14, MASK_XLEN(val3); \
+      inst x14, x1, x2; \
+    )
+#define TEST_RR_OP_RD( testnum, inst, result, rd, val1, val2 ) \
+    TEST_CASE( testnum, x14, result, \
+      li  x1, MASK_XLEN(val1); \
+      li  x2, MASK_XLEN(val2); \
+      li  x14, MASK_XLEN(rd); \
+      inst x14, x1, x2; \
     )
 
 #-----------------------------------------------------------------------
@@ -763,3 +827,79 @@ pass: \
 #define TEST_DATA
 
 #endif
+
+
+/*
+
+#define TEST_kernel( testnum, testreg, correctval ) \
+test_ ## testnum: \
+	la	a5,data;  \
+	la	a6,kernel;  \
+  lw	a0,0(a5);  \
+	pkbb32	a1, a0, a0; \
+	lw	s2, 4(a5); \
+	pkbb32	a0, s2, s2 ;\
+	ld	t3, 0(a6); \
+	smaqa.su	s11, t3, a1; \
+	smaqa.su	t6, t3, a0; \
+	ld	t3, 8(a6); \
+	smaqa.su	s7, t3, a1; \
+	smaqa.su	t4, t3, a0; \
+	ld	t3, 16(a6); \
+  li  x17,0;                      \
+  add x17, x17,s11 ;                             \
+  add x17, x17,t6 ;                             \
+  add x17, x17,s7   ;                           \
+  add x17, x17,t4   ;                           \
+  mv x14, x17 ;\
+  li  x7, MASK_XLEN(correctval); \
+  li  TESTNUM, testnum; \
+  bne testreg, x7, fail; \
+
+
+*/
+
+#define TEST_kernel( testnum, testreg, correctval ) \
+test_ ## testnum: \
+	la	a5,data;  \
+	la	a6,kernel ; \
+  mv s11,zero;\
+  mv t6,zero;\
+  mv s7,zero;\
+  mv t4,zero;\
+  addi s3 ,x0 ,3 ;\
+  conv_loop:;\
+  lw	a0,0(a5);  \
+	pkbb32	a1, a0, a0; \
+	lw	s2, 4(a5); \
+	pkbb32	a0, s2, s2 ;\
+	ld	t3, 0(a6); \
+	smaqa.su	s11, t3, a1; \
+	smaqa.su	t6, t3, a0; \
+	ld	t3, 8(a6); \
+	smaqa.su	s7, t3, a1; \
+	smaqa.su	t4, t3, a0; \
+  li  x17,0;                      \
+  add x17, x17,s11 ;                             \
+  add x17, x17,t6 ;                             \
+  add x17, x17,s7   ;                           \
+  add x17, x17,t4   ;                           \
+  ld	t3, 16(a6); \
+  smaqa.su	s11, t3, a1; \
+	smaqa.su	t6, t3, a0; \
+	ld	t3, 24(a6); \
+	smaqa.su	s7, t3, a1; \
+	smaqa.su	t4, t3, a0; \
+  add x17, x17,s11 ;                             \
+  add x17, x17,t6 ;                             \
+  add x17, x17,s7   ;                           \
+  add x17, x17,t4   ;                           \
+  addi s3 ,s3, -1;\
+  addi a5, a5,8;\
+  addi a6, a6,24;\
+  bne s3 ,zero ,conv_loop;\
+  mv x14, x17 ;\
+  li  x7, MASK_XLEN(correctval); \
+  li  TESTNUM, testnum; \
+  bne testreg, x7, fail; \
+
